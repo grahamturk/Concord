@@ -8,7 +8,8 @@ conf.file({ file: 'config.json' });
 // create a bot
 var bot = new SlackBot({
   token: conf.get('token'),
-  name: conf.get('name')
+  name: conf.get('name'),
+    location: conf.get('location')
 });
 
 var startWords = ["lunch", "order", "dinner", "breakfast", "brunch"];
@@ -91,6 +92,8 @@ function getTypeOfFood() {
        return topFood.type;
     });
 }
+
+
 
 
 
