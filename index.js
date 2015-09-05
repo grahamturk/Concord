@@ -1,6 +1,8 @@
 var _ = require('lodash');
 var SlackBot = require('slackbots');
 var yelp = require('node-yelp');
+var LocuClient = require('./lib/locu');
+var PostmatesClient = require('./lib/postmates');
 var conf = require('nconf');
 conf.file({ file: 'config.json' });
 
@@ -24,6 +26,16 @@ var containsStartWord = function(message) {
     }
     return false;
 };
+
+var locuClient = new LocuClient({
+  api_key: conf.get('locu:api_key'),
+  api_endpoint: conf.get('locu:api_endpoint')
+});
+
+var postmatesClient = new PostmatesClient({
+  customer_id: conf.get('postmates:customer_id'),
+  test_api_key: conf.get('postmates:test_api_key')
+});
 
 var yelpClient = yelp.createClient({
   oauth: {
