@@ -18,6 +18,7 @@
   "homepage": "https://github.com/grahamturk/Concord",
   "dependencies": {
     "nconf": "^0.7.2",
+    "node-yelp": "0.0.3",
     "slackbots": "^0.3.0"
   }
 }
