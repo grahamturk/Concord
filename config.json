@@ -1,6 +1,7 @@
 {
   "name": "Concord",
   "slack_token": "xoxb-10236404791-FVkvEuD7HTcfiIoDcaoa73Km",
+  "channel": "lunch",
   "lunch_time": "14:38",
   "yelp": {
     "consumer_key": "nWJ_14RwD8hssmHwuP6jGw",
