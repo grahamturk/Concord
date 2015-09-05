@@ -25,16 +25,6 @@ function containsStartWord(message) {
   return false;
 }
 
-// Checks if lunch was used in message, starts LunchBot.
-bot.on('message', function(data) {
-  if (data.type === 'message' && data.subtype !== 'bot_message') {
-    var message = data.text;
-    if (containsStartWord(message)) {
-      getTypeOfFood();
-    }
-  }
-});
-
 var yelpClient = yelp.createClient({
   oauth: {
     'consumer_key': conf.get('yelp:consumer_key'),
@@ -79,6 +69,12 @@ loop();
 
 bot.on('message', function(data) {
   if (data.type === 'message' && data.subtype !== 'bot_message' && data.channel === channel) {
+
+    if (STATE === 'SLEEP') {
+      if (containsStartWord(data.text.toLowerCase())) {
+        STATE = 'PROMPT';
+      }
+    }
 
     if (STATE === 'RESTAURANT') {
       var message = data.text.toLowerCase();

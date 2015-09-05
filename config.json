@@ -12,5 +12,10 @@
   "postmates": {
     "customer_id": "cus_KTfttjB_oGi5Ik",
     "test_api_key": "e0fceecd-0591-4490-bccd-9eaf995432df"
-  }
+  },
+  "locu": {
+    "api_key": "398f41921429cd1e1a233206936193cbaa35e087",
+    "api_endpoint": "https://api.locu.com/v2/venue/search"
+  },
+  "location": "Philadelphia"
 }
