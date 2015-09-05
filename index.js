@@ -2,10 +2,13 @@ var _ = require('lodash');
 var SlackBot = require('slackbots');
 var yelp = require('node-yelp');
 var conf = require('nconf');
-var channel;
 conf.file({ file: 'config.json' });
 
-// create a bot
+var lunchTime = require('time-detect')(conf.get('lunch_time'));
+var channel = conf.get('channel');
+var STATE = 'SLEEP';
+var cuisines = {};
+
 var bot = new SlackBot({
   token: conf.get('token'),
   name: conf.get('name'),
@@ -22,74 +25,94 @@ var containsStartWord = function(message) {
     return false;
 };
 
-// Checks if lunch was used in message, starts LunchBot.
-bot.on('message', function(data) {
-    if (data.type === 'message' && data.subtype !== 'bot_message') {
-        var message = data.text;
-        channel = data.getChannel;
-        if (containsStartWord()) {
-            foodOptions(getTypeOfFood());
-        }
-    }
-});
-
 var yelpClient = yelp.createClient({
   oauth: {
-    'consumer_key': 'nWJ_14RwD8hssmHwuP6jGw',
-    'consumer_secret': '3afs0cqQVD2O81_4bwXA5kK3zqM',
-    'token': 'VBMxaHjIw2hRW7uhD57JTIkrhNs3va_v',
-    'token_secret': 'WRteO_R52dxELoFcYetH8WG6OPM'
+    'consumer_key': conf.get('yelp:consumer_key'),
+    'consumer_secret': conf.get('yelp:consumer_secret'),
+    'token': conf.get('yelp:token'),
+    'token_secret': conf.get('yelp:token_secret')
   }
 });
+
+function prompt() {
+  bot.postMessageToChannel(channel, "What kind of food would you like today? (Eg. Chinese, Italian)? Please respond within 15 minutes.");
+}
+
+function containsStartWord(message) {
+  var startWords = ["lunch", "order", "dinner", "breakfast", "brunch"];
+  for (var word in startWords) {
+    if (message.indexOf(word) >= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function loop() {
+  setTimeout(function() {
+    var now = new Date();
+
+    if (STATE === 'SLEEP') {
+      if (now.getHours() === lunchTime.getHours()) {
+        if (now.getMinutes() === lunchTime.getMinutes()) {
+          prompt();
+          STATE = 'CUISINE';
+        }
+      }
+    }
+
+    else if (STATE === 'CUISINE') {
+      if (now.getHours() === lunchTime.getHours()) {
+        if (now.getMinutes() === lunchTime.getMinutes() + 15) {
+          var sorted = _.sortBy(cuisines, function(n) {
+            return n;
+          }, _.values);
+          console.log(sorted);
+        }
+      }
+    }
+
+    loop();
+  }, 1000);}
+loop();
 
 bot.on('message', function(data) {
-  if (data.type === 'message' && data.subtype !== 'bot_message') {
-    if (data.text.search('food') !== -1) {
-      var term = data.text.replace('food', '');
-      yelpClient.search({
-        term: term,
-        location: 'Philadelphia'
-      }).then(function(data) {
-        var restaurants = _.pluck(data.businesses, 'name');
-        bot.postMessageToChannel('lunch', restaurants.join('\n'));
-      });
+  if (data.type === 'message' && data.subtype !== 'bot_message' && data.channel === channel) {
+
+    if (STATE === 'SLEEP') {
+      if (containsStartWord(data.text.toLowerCase())) {
+        prompt();
+        STATE = 'CUISINE';
+      }
     }
+
+    if (STATE === 'CUISINE') {
+      var message = data.text.toLowerCase();
+
+      if (message.indexOf("food") >= 0) {
+        message = message.replace('food', '');
+      }
+
+      if (cuisines[message] !== null) {
+        cuisines[message]++;
+        var currCount = cuisines[message];
+      } else {
+        cuisines[message] = 1;
+      }
+    }
+
+    // if (data.text.search('food') !== -1) {
+    //   var term = data.text.replace('food', '');
+    //   yelpClient.search({
+    //     term: term,
+    //     location: 'Philadelphia'
+    //   }).then(function(data) {
+    //     var restaurants = _.pluck(data.businesses, 'name');
+    //     bot.postMessageToChannel('lunch', restaurants.join('\n'));
+    //   });
+    // }
   }
 });
-
-function getTypeOfFood() {
-    var users = bot.getUsers()._value.members;
-    for (var userIndex in users) {
-        var username = users[userIndex].name;
-        if (username !== 'concord' && username !== 'slackbot') {
-            bot.postMessageToChannel(username,
-                "What kind of food would you like (Eg. Chinese, Italian)? Please respond within 15 minutes.", {});
-        }
-    }
-    var typeOfFood = {};
-    var topFood = { type: [], count: 0 };
-    bot.on('message', function(data) {
-       if (data.type === 'message' && data.subtype !== 'bot_message' && data.channel == channel) {
-           var message = data.text.toLowerCase();
-           if (message.indexOf("food") >= 0) {
-               message = message.substring(0,message.length - 5);
-           }
-           if (typeOfFood[message] != null) {
-               typeOfFood[message]++;
-               var currCount = typeOfFood[message];
-               if (topFood.count < currCount) {
-                   topFood.type = [message];
-                   topFood.count = currCount;
-               } else if (topFood.count == currCount) {
-                   topFood.type[topFood.type.length + 1] = message;
-               }
-           } else {
-               typeOfFood[message] = 1;
-           }
-       }
-       return topFood.type;
-    });
-}
 
 function foodOptions(topFood) {
   var numChoices = 5;
@@ -112,7 +135,3 @@ function foodOptions(topFood) {
     });
   }
 }
-
-
-
-
