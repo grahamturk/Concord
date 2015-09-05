@@ -6,6 +6,8 @@ var bot = new SlackBot({
     name: 'Concord'
 });
 
-bot.on('message', function(event) {
-  console.log(event);
+bot.on('message', function(data) {
+  if (data.type === 'message' && data.subtype !== 'bot_message') {
+    console.log(data);
+  }
 });
