@@ -5,20 +5,43 @@ var conf = require('nconf');
 
 conf.file({ file: 'config.json' });
 
-// create a bot
+var lunchTime = require('time-detect')(conf.get('lunch_time'));
+var STATE = 'SLEEP';
+
 var bot = new SlackBot({
-  token: conf.get('token'),
+  token: conf.get('slack_token'),
   name: conf.get('name')
 });
 
 var yelpClient = yelp.createClient({
   oauth: {
-    'consumer_key': 'nWJ_14RwD8hssmHwuP6jGw',
-    'consumer_secret': '3afs0cqQVD2O81_4bwXA5kK3zqM',
-    'token': 'VBMxaHjIw2hRW7uhD57JTIkrhNs3va_v',
-    'token_secret': 'WRteO_R52dxELoFcYetH8WG6OPM'
+    'consumer_key': conf.get('yelp:consumer_key'),
+    'consumer_secret': conf.get('yelp:consumer_secret'),
+    'token': conf.get('yelp:token'),
+    'token_secret': conf.get('yelp:token_secret')
   }
 });
+
+function loop() {
+  setTimeout(function() {
+    if (STATE === 'SLEEP') {
+      var date = new Date();
+      if (date.getHours() === lunchTime.getHours()) {
+        if (date.getMinutes() === lunchTime.getMinutes()) {
+          STATE = 'PROMPT';
+        }
+      }
+    }
+
+    else if (STATE === 'PROMPT') {
+      bot.postMessageToChannel('lunch', 'Ready for lunch?');
+      STATE = 'WAITING';
+    }
+
+    loop();
+  }, 1000);
+}
+loop();
 
 bot.on('message', function(data) {
   if (data.type === 'message' && data.subtype !== 'bot_message') {

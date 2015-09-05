@@ -1,4 +1,11 @@
 {
   "name": "Concord",
-  "token": "xoxb-10236404791-FVkvEuD7HTcfiIoDcaoa73Km"
+  "slack_token": "xoxb-10236404791-FVkvEuD7HTcfiIoDcaoa73Km",
+  "yelp": {
+    "consumer_key": "nWJ_14RwD8hssmHwuP6jGw",
+    "consumer_secret": "3afs0cqQVD2O81_4bwXA5kK3zqM",
+    "token": "VBMxaHjIw2hRW7uhD57JTIkrhNs3va_v",
+    "token_secret": "WRteO_R52dxELoFcYetH8WG6OPM"
+  },
+  "lunch_time": "14:38"
 }
