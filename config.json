@@ -1,6 +1,8 @@
 {
   "name": "Concord",
   "token": "xoxb-10236404791-FVkvEuD7HTcfiIoDcaoa73Km",
-  "lunchhour": "12",
-  "lunchminute": "00"
+  "postmates": {
+    "customer_id": "cus_KTfttjB_oGi5Ik",
+    "test_api_key": "e0fceecd-0591-4490-bccd-9eaf995432df"
+  }
 }
