@@ -14,17 +14,6 @@ var bot = new SlackBot({
   name: conf.get('name')
 });
 
-
-function containsStartWord(message) {
-  var startWords = ["lunch", "order", "dinner", "breakfast", "brunch"];
-  for (var word in startWords) {
-    if (message.indexOf(word) >= 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 var yelpClient = yelp.createClient({
   oauth: {
     'consumer_key': conf.get('yelp:consumer_key'),
@@ -36,6 +25,16 @@ var yelpClient = yelp.createClient({
 
 function prompt() {
   bot.postMessageToChannel(channel, "What kind of food would you like today? (Eg. Chinese, Italian)? Please respond within 15 minutes.");
+}
+
+function containsStartWord(message) {
+  var startWords = ["lunch", "order", "dinner", "breakfast", "brunch"];
+  for (var word in startWords) {
+    if (message.indexOf(word) >= 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function loop() {
