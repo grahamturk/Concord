@@ -8,7 +8,7 @@ conf.file({ file: 'config.json' });
 // create a bot
 var bot = new SlackBot({
   token: conf.get('token'),
-  name: conf.get('name')
+  name: conf.get('name'),
 });
 
 var startWords = ["lunch", "order", "dinner", "breakfast", "brunch"];
@@ -20,7 +20,7 @@ var containsStartWord = function(message) {
         }
     }
     return false;
-}
+};
 
 // Checks if lunch was used in message, starts LunchBot.
 bot.on('message', function(data) {
@@ -28,7 +28,7 @@ bot.on('message', function(data) {
         var message = data.text;
         channel = data.getChannel;
         if (containsStartWord()) {
-            getTypeOfFood();
+            foodOptions(getTypeOfFood());
         }
     }
 });
@@ -71,7 +71,6 @@ function getTypeOfFood() {
     bot.on('message', function(data) {
        if (data.type === 'message' && data.subtype !== 'bot_message' && data.channel == channel) {
            var message = data.text.toLowerCase();
-           // TODO: account for differences in strings like adding "food" to the end by removing spaces
            if (message.indexOf("food") >= 0) {
                message = message.substring(0,message.length - 5);
            }
@@ -91,6 +90,29 @@ function getTypeOfFood() {
        return topFood.type;
     });
 }
+
+function foodOptions(topFood) {
+  var numChoices = 5;
+  if (topFood.length >= 3) {
+    numChoices = 2;
+  }
+  else if (topFood.length === 2) {
+    numChoices = 3;
+  }
+  for (var type in topFood) {
+    yelpClient.search({
+      term: type, location: conf.get('location')
+    }).then(function (data) {
+      var restaurants = _.pluck(data.businesses, 'name');
+      var results = [];
+      for (var i = 0; i < numChoices; i++) {
+        results[i] = restaurants[i];
+      }
+      bot.postMessageToChannel('lunch', results.join('\n'), {});
+    });
+  }
+}
+
 
 
 
