@@ -34,6 +34,10 @@ var yelpClient = yelp.createClient({
   }
 });
 
+function prompt() {
+  bot.postMessageToChannel(channel, "What kind of food would you like today? (Eg. Chinese, Italian)? Please respond within 15 minutes.");
+}
+
 function loop() {
   setTimeout(function() {
     var now = new Date();
@@ -41,17 +45,13 @@ function loop() {
     if (STATE === 'SLEEP') {
       if (now.getHours() === lunchTime.getHours()) {
         if (now.getMinutes() === lunchTime.getMinutes()) {
-          STATE = 'PROMPT';
+          prompt();
+          STATE = 'CUISINE';
         }
       }
     }
 
-    else if (STATE === 'PROMPT') {
-      bot.postMessageToChannel(channel, "What kind of food would you like today? (Eg. Chinese, Italian)? Please respond within 15 minutes.");
-      STATE = 'RESTAURANT';
-    }
-
-    else if (STATE === 'RESTAURANT') {
+    else if (STATE === 'CUISINE') {
       if (now.getHours() === lunchTime.getHours()) {
         if (now.getMinutes() === lunchTime.getMinutes() + 15) {
           var sorted = _.sortBy(cuisines, function(n) {
@@ -72,11 +72,12 @@ bot.on('message', function(data) {
 
     if (STATE === 'SLEEP') {
       if (containsStartWord(data.text.toLowerCase())) {
-        STATE = 'PROMPT';
+        prompt();
+        STATE = 'CUISINE';
       }
     }
 
-    if (STATE === 'RESTAURANT') {
+    if (STATE === 'CUISINE') {
       var message = data.text.toLowerCase();
 
       if (message.indexOf("food") >= 0) {
