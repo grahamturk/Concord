@@ -1,11 +1,16 @@
 var SlackBot = require('slackbots');
+var conf = require('nconf');
+
+conf.file({ file: 'config.json' });
 
 // create a bot
 var bot = new SlackBot({
-    token: 'xoxb-10236404791-FVkvEuD7HTcfiIoDcaoa73Km',
-    name: 'Concord'
+  token: conf.get('token'),
+  name: conf.get('name')
 });
 
-bot.on('message', function(event) {
-  console.log(event);
+bot.on('message', function(data) {
+  if (data.type === 'message' && data.subtype !== 'bot_message') {
+    console.log(data);
+  }
 });
