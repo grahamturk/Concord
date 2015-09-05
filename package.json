@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/grahamturk/Concord",
   "dependencies": {
+    "nconf": "^0.7.2",
     "slackbots": "^0.3.0"
   }
 }
